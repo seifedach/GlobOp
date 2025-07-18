@@ -4,7 +4,7 @@ from .base import SuGD
 
 
 class AdaptiveOptimizer:
-    def __init__(self, model, criterion, low_bound, up_bound, train_loader, device , sugd_iters, optimizer_class, **optimizer_kwargs):
+    def __init__(self, model, criterion, low_bound, up_bound, train_loader, device , sugd_iters, w, output, optimizer_class, **optimizer_kwargs):
         self.model = model
         self.criterion = criterion
         self.low_bound = low_bound
@@ -12,6 +12,8 @@ class AdaptiveOptimizer:
         self.train_loader = train_loader
         self.device = device
         self.sugd_iters = sugd_iters
+        self.w = w
+        self.output = output
         self.optimizer_class = optimizer_class
         self.optimizer_kwargs = optimizer_kwargs
         self.optimizer = None
@@ -20,7 +22,7 @@ class AdaptiveOptimizer:
     def step_epoch(self):
         batch = next(iter(self.train_loader))
         self.current_lr = SuGD(
-            self.model, self.criterion, batch, self.low_bound, self.up_bound, self.device, self.sugd_iters
+            self.model, self.criterion, batch, self.low_bound, self.up_bound, self.device, self.sugd_iters, self.w, self.output
         )
         print(f"  [AdaptiveOptimizer] Best LR: {self.current_lr:.5f}")
         self.optimizer = self.optimizer_class(

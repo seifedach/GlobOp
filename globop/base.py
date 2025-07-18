@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 
-def SuGD(model, criterion, batch, low_bound, up_bound, device, sugd_iters = 2):
+def SuGD(model, criterion, batch, low_bound, up_bound, device, sugd_iters = 2, w = 0.2, output = "up", history_dir = False):
     x_sample, y_sample = batch
     x_sample, y_sample = x_sample.to(device), y_sample.to(device)
 
@@ -14,7 +14,7 @@ def SuGD(model, criterion, batch, low_bound, up_bound, device, sugd_iters = 2):
     
     lr1, lr2 = low_bound, up_bound
     lr1s, lr2s = [], []
-    w = 0.2
+    w = w
 
     for _ in range(sugd_iters):
         # === LR1 Step ===
@@ -59,6 +59,10 @@ def SuGD(model, criterion, batch, low_bound, up_bound, device, sugd_iters = 2):
         # Clean up memory
         del optimizer1, optimizer2, outputs1, outputs2, loss1, loss2
     print(lr1, lr2)
-
     model.load_state_dict(weights_backup)
-    return float((lr1 + lr2) / 2)
+    if output == "up":
+        return float(lr2)
+    elif output == "down":
+        return float(lr1)
+    elif output == "avg":
+        return float((lr1 + lr2) / 2)
