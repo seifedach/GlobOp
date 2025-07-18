@@ -40,17 +40,17 @@ class AdaptiveOptimizer:
 
 # === Specific Wrappers ===
 
-def SuperSGD(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, **kwargs):
-    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, optim.SGD, **kwargs)
+def SuperSGD(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, w = 0.2, output = "up", **kwargs):
+    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, w, output, optim.SGD, **kwargs)
 
-def SuperAdam(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, **kwargs):
-    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, optim.Adam, **kwargs)
+def SuperAdam(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, w = 0.2, output = "up", **kwargs):
+    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, w, output, optim.Adam, **kwargs)
 
-def SuperAdamW(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, **kwargs):
-    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, optim.AdamW, **kwargs)
+def SuperAdamW(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, w = 0.2, output = "up", **kwargs):
+    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, w, output, optim.AdamW, **kwargs)
 
-def SuperAdagrad(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, **kwargs):
-    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, optim.Adagrad, **kwargs)
+def SuperAdagrad(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, w = 0.2, output = "up", **kwargs):
+    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, w, output, optim.Adagrad, **kwargs)
 
-def SuperRMSprop(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, **kwargs):
-    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, optim.RMSprop, **kwargs)
+def SuperRMSprop(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, w = 0.2, output = "up", **kwargs):
+    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, w, output, optim.RMSprop, **kwargs)
