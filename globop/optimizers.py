@@ -4,13 +4,14 @@ from .base import SuGD
 
 
 class AdaptiveOptimizer:
-    def __init__(self, model, criterion, low_bound, up_bound, train_loader, device, optimizer_class, **optimizer_kwargs):
+    def __init__(self, model, criterion, low_bound, up_bound, train_loader, device , sugd_iters, optimizer_class, **optimizer_kwargs):
         self.model = model
         self.criterion = criterion
         self.low_bound = low_bound
         self.up_bound = up_bound
         self.train_loader = train_loader
         self.device = device
+        self.sugd_iters = sugd_iters
         self.optimizer_class = optimizer_class
         self.optimizer_kwargs = optimizer_kwargs
         self.optimizer = None
@@ -19,7 +20,7 @@ class AdaptiveOptimizer:
     def step_epoch(self):
         batch = next(iter(self.train_loader))
         self.current_lr = SuGD(
-            self.model, self.criterion, batch, self.low_bound, self.up_bound, self.device
+            self.model, self.criterion, batch, self.low_bound, self.up_bound, self.device, self.sugd_iters
         )
         print(f"  [AdaptiveOptimizer] Best LR: {self.current_lr:.5f}")
         self.optimizer = self.optimizer_class(
@@ -37,17 +38,17 @@ class AdaptiveOptimizer:
 
 # === Specific Wrappers ===
 
-def SuperSGD(model, criterion, low_bound, up_bound, train_loader, device, **kwargs):
-    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, optim.SGD, **kwargs)
+def SuperSGD(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, **kwargs):
+    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, optim.SGD, **kwargs)
 
-def SuperAdam(model, criterion, low_bound, up_bound, train_loader, device, **kwargs):
-    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, optim.Adam, **kwargs)
+def SuperAdam(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, **kwargs):
+    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, optim.Adam, **kwargs)
 
-def SuperAdamW(model, criterion, low_bound, up_bound, train_loader, device, **kwargs):
-    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, optim.AdamW, **kwargs)
+def SuperAdamW(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, **kwargs):
+    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, optim.AdamW, **kwargs)
 
-def SuperAdagrad(model, criterion, low_bound, up_bound, train_loader, device, **kwargs):
-    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, optim.Adagrad, **kwargs)
+def SuperAdagrad(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, **kwargs):
+    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, optim.Adagrad, **kwargs)
 
-def SuperRMSprop(model, criterion, low_bound, up_bound, train_loader, device, **kwargs):
-    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, optim.RMSprop, **kwargs)
+def SuperRMSprop(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters=10, **kwargs):
+    return AdaptiveOptimizer(model, criterion, low_bound, up_bound, train_loader, device, sugd_iters, optim.RMSprop, **kwargs)
