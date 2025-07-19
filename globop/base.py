@@ -66,3 +66,65 @@ def SuGD(model, criterion, batch, low_bound, up_bound, device, sugd_iters = 2, w
         return float(lr1)
     elif output == "avg":
         return float((lr1 + lr2) / 2)
+    
+
+def SuGD_Dynamic(model, criterion, batch, optimizer, device, alpha=0.9, sugd_iters=2, w=0.2, output="up"):
+    x_sample, y_sample = batch
+    x_sample, y_sample = x_sample.to(device), y_sample.to(device)
+
+    # Backup model weights
+    weights_backup = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+
+    # Get current LR from optimizer
+    current_lr = optimizer.param_groups[0]['lr']
+    
+    # Dynamic bounds
+    lr1 = current_lr * alpha       # lower bound
+    lr2 = current_lr / alpha       # upper bound
+
+    for _ in range(sugd_iters):
+        # --- LR1 Step ---
+        model.load_state_dict(weights_backup)
+        optimizer1 = optim.Adam(model.parameters(), lr=lr1)
+        optimizer1.zero_grad()
+        outputs1 = model(x_sample)
+        loss1 = criterion(outputs1, y_sample)
+        loss1.backward()
+        optimizer1.step()
+
+        model.eval()
+        with torch.no_grad():
+            val_loss1 = criterion(model(x_sample), y_sample).item()
+
+        # --- LR2 Step ---
+        model.load_state_dict(weights_backup)
+        optimizer2 = optim.Adam(model.parameters(), lr=lr2)
+        optimizer2.zero_grad()
+        outputs2 = model(x_sample)
+        loss2 = criterion(outputs2, y_sample)
+        loss2.backward()
+        optimizer2.step()
+
+        model.eval()
+        with torch.no_grad():
+            val_loss2 = criterion(model(x_sample), y_sample).item()
+
+        # Update bounds
+        delta = val_loss2 - val_loss1
+        if delta < 0:
+            lr1 = lr1 - w * (lr2 - lr1) * delta
+        else:
+            lr2 = lr2 - w * (lr2 - lr1) * delta
+
+        del optimizer1, optimizer2, outputs1, outputs2, loss1, loss2
+
+    # Restore original model weights
+    model.load_state_dict(weights_backup)
+
+    if output == "up":
+        return float(lr2)
+    elif output == "down":
+        return float(lr1)
+    elif output == "avg":
+        return float((lr1 + lr2) / 2)
+
